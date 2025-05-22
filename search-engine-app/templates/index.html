@@ -1,0 +1,39 @@
+{% extends '_base.html' %}
+{% block content %}
+<div class="search-container">
+    {% if documents | length > 0 %}
+    <div class="document-container" style="background-color: white;">
+        <h2>Results
+            {% if total %}
+            : {{ total }} Documents
+            {% endif %}
+        </h2>
+    </div>
+    {% endif %}
+    {% for doc in documents %}
+    {% include '_search_result.html' %}
+    {% endfor %}
+</div>
+<div class="page-container">
+    <script>
+        paginate = function (page_number) {
+
+            let new_location = window.location.toString().replace(/&page\-number=[0-9]+/gm, '')
+            window.location = new_location + '&page-number=' + page_number
+        }
+    </script>
+    {% if n_pages %}
+    {% for i in range(min_page, max_page) %}
+    {% if i == page_number %}
+    <div class="page-option" onclick="paginate('{{i}}')">
+        {{i + 1}}
+    </div>
+    {% else %}
+    <div class="page-option inactive" onclick="paginate('{{i}}')">
+        {{i + 1}}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

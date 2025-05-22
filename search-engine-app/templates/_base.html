@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Engine App</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='custom.css') }}" />
+
+</head>
+
+<body>
+    <script>
+        go_to_document = function (document_id) {
+            window.location = "/document/" + document_id
+        }
+    </script>
+    <div class="header">
+        <h1><a href="/">{% block title%}Search Engine App{%endblock%}</a></h1>
+    </div>
+    <div class="search-box">
+        <form id="form-search" method="GET" action="/">
+            <input type="text" id="search-input" placeholder="search value, ..." form="form-search" /
+                name="search-query" value="{%if query_string%}{{query_string}}{% endif %}">
+            <input type="submit" hidden form="form-search" />
+        </form>
+    </div>
+    {% block content%}
+    {% endblock %}
+
+</body>
+
+</html>

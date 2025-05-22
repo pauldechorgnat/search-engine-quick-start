@@ -1,0 +1,150 @@
+@font-face {
+    font-family: 'Marianne';
+    src: url('fonts/marianne-regular-webfont.woff');
+}
+
+:root {
+    /*--cdc-color: #a6192e*/
+    --bleu-france: #000091;
+    --rouge-marianne: #E1000F;
+}
+
+
+body {
+    font-family: 'Marianne';
+    /* background-color: green; */
+    margin: 0;
+}
+
+.search-box {
+    width: 100%;
+    height: 5rem;
+    /* background-color: red; */
+}
+
+#search-input {
+    height: 2rem;
+    border-radius: .25rem;
+    height: 3rem;
+    width: calc(50% - 4rem);
+    margin-left: 25%;
+    margin-right: 25%;  
+    padding-left: 2rem;
+    padding-right: 2rem;
+    font-size: 1.5rem;
+    color: grey;
+    border-color: black ;
+}
+
+
+.header {
+    text-align: center;
+}
+
+h1 {
+    font-size: 4rem;
+}
+
+img {
+    position: absolute;
+    display: none
+}
+
+
+
+.result-container, .document-container, .advanced-search-toggle-container, .advanced-search-container, .search-options, .page-container {
+    width: calc(50% - 4rem);
+    margin-left: 25%;
+    margin-right: 25%;
+    background-color: rgb(235, 235, 235);
+    margin-top: 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 0.25rem;
+    /* opacity: .8; */
+}
+
+.search-options, .page-container {
+    background-color: white;
+    padding: 0;
+
+}
+.page-container {
+    text-align: center;
+}
+.search-option, .page-option {
+    color: white;
+    background-color: var(--rouge-marianne);
+    margin-top: 1rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 0.25rem;
+    display: inline-block;
+
+}
+
+.page-option:hover {
+    cursor: pointer;
+}
+
+.document-container::selection {
+    color: white;
+    background: var(--rouge-marianne);
+  }
+
+  .advanced-search-toggle-container {
+    text-align: center;
+    background-color: var(--rouge-marianne);
+    color: white;
+    width: calc(20% - 4rem);
+    padding-left: 2rem;
+    padding-right: 2rem;
+    margin-left: 40%;
+    margin-right: 40%;
+  }
+  .advanced-search-toggle-container:hover {
+    cursor: pointer;
+  }
+
+  .advanced-search-container {
+    display: none;
+  }
+
+.result-container:hover {
+    /* opacity: 1; */
+    background-color: var(--rouge-marianne);
+    color: white;
+    cursor: pointer;
+}
+
+.result-title {
+    font-weight: bold;
+}
+
+.result-date {
+    margin-bottom: 1rem;
+}
+
+a {
+    all: unset;
+    cursor: pointer;
+}
+
+em {
+    font-weight: bold;
+    font-style: normal;
+}
+
+.inactive {
+    background-color: rgb(235, 235, 235);
+    color: black;
+
+}
+
+.page-container {
+    margin-bottom: 2rem;
+}
