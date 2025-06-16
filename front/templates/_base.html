@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Engine App</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='custom.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='custom.css') }}" />
 
 </head>
 
@@ -21,7 +21,7 @@
     <div class="search-box">
         <form id="form-search" method="GET" action="/">
             <input type="text" id="search-input" placeholder="search value, ..." form="form-search" /
-                name="search-query" value="{%if query_string%}{{query_string}}{% endif %}">
+                name="search_query" value="{%if query_string%}{{query_string}}{% endif %}">
             <input type="submit" hidden form="form-search" />
         </form>
     </div>

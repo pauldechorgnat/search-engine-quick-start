@@ -19,7 +19,7 @@
         paginate = function (page_number) {
 
             let new_location = window.location.toString().replace(/&page\-number=[0-9]+/gm, '')
-            window.location = new_location + '&page-number=' + page_number
+            window.location = new_location + '&page_number=' + page_number
         }
     </script>
     {% if n_pages %}

@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+
+  search-engine-mock-api-api:
+    build: 
+      context: ./apis/mock-api
+      dockerfile: mock-api.Dockerfile
+    container_name: search-engine-mock-api-api
+    networks:
+      - search-engine-mock-api-network
+
+  search-engine-mock-api-front:
+    build: 
+      context: ./front
+      dockerfile: front.Dockerfile
+    container_name: search-engine-mock-api-front
+    networks:
+      - search-engine-mock-api-network
+    ports:
+      - "2022:2022"
+    depends_on:
+      - search-engine-mock-api-api
+    environment:
+      - API_URL=http://search-engine-mock-api-api:8000
+
+networks:
+  search-engine-mock-api-network:
+
