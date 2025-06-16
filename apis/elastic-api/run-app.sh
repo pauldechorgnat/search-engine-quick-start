@@ -3,9 +3,9 @@
 sleep 30
 
 # Run the DB fill script
-echo "Running refresh_data.py..."
+echo "Inserting data into Elsastic ..."
 python refresh_data.py --elastic-search-host $ELASTICSEARCH_HOSTS
 
 # Start the Flask app
-echo "Starting Flask app..."
-python app.py -d 
+echo "Starting API..."
+python -m uvicorn api:api --host 0.0.0.0 --port 8000

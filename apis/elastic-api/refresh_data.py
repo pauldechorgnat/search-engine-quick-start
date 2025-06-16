@@ -1,7 +1,6 @@
-import datetime
-
 from elasticsearch import Elasticsearch
 
+from models import Document
 from utils import (
     wait_for_elasticsearch,
     create_index,
@@ -14,46 +13,45 @@ from utils import (
 def read_data_to_insert(
     *args,
     **kwargs,
-) -> list[dict]:
+) -> list[Document]:
     from lorem_text import lorem
     import random
 
     data = [
-        {
-            "text": lorem.paragraphs(random.randint(4, 10)),
-            "name": lorem.words(random.randint(4, 10)),
-            "date": datetime.date(year=2020, month=1, day=1) + datetime.timedelta(days=random.randint(1, 365 * 4)),
-            "id": str(i),
-        }
+        Document(
+            text=lorem.paragraphs(random.randint(4, 10)),
+            title=lorem.words(random.randint(4, 10)),
+        )
         for i in range(50)
     ]
 
     return data
 
 
-def format_data(data: dict) -> dict:
-    return data
+def format_data(data: Document) -> dict:
+    return data.model_dump(mode="json")
 
 
 def refresh_data(
-    new_data: list[dict],
+    new_data: list[Document],
     index_name: str,
-    elastic_search_client: Elasticsearch,
+    elasticsearch_client: Elasticsearch,
     id_field: str = "id",
     replace_old_data: bool = True,
 ):
+    print("YOOOOOO")
     if not wait_for_elasticsearch(
-        elastic_search_client=elastic_search_client,
+        elasticsearch_client=elasticsearch_client,
     ):
         raise ValueError("ElasticSearch cannot be reached")
 
     create_index(
-        elastic_search_client=elastic_search_client,
+        elasticsearch_client=elasticsearch_client,
         index_name=index_name,
     )
 
     n_documents = count_documents(
-        elastic_search_client=elastic_search_client,
+        elasticsearch_client=elasticsearch_client,
         index_name=index_name,
     )
 
@@ -61,17 +59,17 @@ def refresh_data(
 
     if replace_old_data:
         delete_all_documents(
-            elastic_search_client=elastic_search_client,
+            elasticsearch_client=elasticsearch_client,
             index_name=index_name,
         )
     insert_documents(
-        elastic_search_client=elastic_search_client,
+        elasticsearch_client=elasticsearch_client,
         index_name=index_name,
         docs=documents,
         id_field=id_field,
     )
     n_documents = count_documents(
-        elastic_search_client=elastic_search_client,
+        elasticsearch_client=elasticsearch_client,
         index_name=index_name,
     )
     print(f"{n_documents} documents in '{index_name}'")
@@ -91,5 +89,6 @@ if __name__ == "__main__":
     refresh_data(
         new_data=read_data_to_insert(...),
         index_name=ELASTIC_INDEX_NAME,
-        elastic_search_client=es,
+        elasticsearch_client=es,
     )
+    print("Data has been inserted")

@@ -21,9 +21,8 @@ def query_get_document(
     client: Client,
     document_id: str,
 ) -> Document:
-    print("LOOOOL")
     response = client.get(url=f"/document/{document_id}")
-    print("YOOOOOO")
+
     try:
         response.raise_for_status()
     except HTTPError as exc:
@@ -43,7 +42,7 @@ def query_get_search(
     response = client.get(
         url="/search",
         params={
-            "query": query,
+            "text_query": query,
             **query_parameters,
         },
     )

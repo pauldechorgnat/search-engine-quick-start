@@ -31,14 +31,14 @@ def get_document_by_id(document_id: str) -> Document | None:
 
 
 def search_documents(
-    query: str | None = None,
+    text_query: str | None = None,
     query_parameters: dict = {},
     page_number: int = 0,
     page_size: int = 5,
 ) -> SearchResponse:
     documents = load_documents()
 
-    with random_seed(str(query) + str(query_parameters)):
+    with random_seed(str(text_query) + str(query_parameters)):
         n_results = random.randint(
             a=0,
             b=100,

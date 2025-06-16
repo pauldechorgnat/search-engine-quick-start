@@ -2,6 +2,8 @@ from elasticsearch import Elasticsearch, helpers, BadRequestError
 import os
 import time
 
+from models import Document, SearchResponse
+
 
 def get_env_variable(env_variable_name: str) -> str:
     value = os.environ.get(env_variable_name)
@@ -10,69 +12,90 @@ def get_env_variable(env_variable_name: str) -> str:
     return value
 
 
-def parse_input(query: str):
-    return query
-
-
 def get_document_by_id(
-    elastic_search_client: Elasticsearch,
+    elasticsearch_client: Elasticsearch,
     index_name: str,
     document_id: str,
-) -> dict | None:
+) -> Document | None:
     try:
-        res = elastic_search_client.get(
+        res = elasticsearch_client.get(
             index=index_name,
             id=document_id,
         )
-        return res["_source"]
+        return Document(**res["_source"])
     except Exception:
         return None
 
 
 def search_documents(
-    elastic_search_client: Elasticsearch,
+    elasticsearch_client: Elasticsearch,
     index_name: str,
-    text_query: str,
-    fields: list[str],
+    text_query: str | None,
+    fields: list[str] = ["text"],
     page_size: int = 10,
     page_number: int = 0,
-) -> tuple[list[dict], int]:
+) -> SearchResponse:
+    if text_query is None:
+        text_query = "*"
+
     query = {
         "multi_match": {
             "query": text_query,
             "fields": fields,
         }
     }
-    count = elastic_search_client.count(
-        index=index_name,
-        query=query,
+    n_results = count_documents(
+        elasticsearch_client=elasticsearch_client,
+        index_name=index_name,
+        text_query=text_query,
+        fields=fields,
     )
-    res = elastic_search_client.search(
+
+    raw_results = elasticsearch_client.search(
         index=index_name,
         query=query,
         size=page_size,
         from_=page_size * page_number,
     )
-    return (
-        [hit["_source"] for hit in res["hits"]["hits"]],
-        count["count"],
+
+    results = [hit["_source"] for hit in raw_results["hits"]["hits"]]
+
+    return SearchResponse(
+        n_results=n_results,
+        results=results,
     )
 
 
 def count_documents(
-    elastic_search_client: Elasticsearch,
+    elasticsearch_client: Elasticsearch,
     index_name: str,
+    text_query: str | None = None,
+    fields: list[str] = ["text"],
 ) -> int:
-    res = elastic_search_client.count(index=index_name)
+    if text_query is None:
+        res = elasticsearch_client.count(
+            index=index_name,
+        )
+    else:
+        query = {
+            "multi_match": {
+                "query": text_query,
+                "fields": fields,
+            }
+        }
+        res = elasticsearch_client.count(
+            index=index_name,
+            query=query,
+        )
     return res["count"]
 
 
 def create_index(
-    elastic_search_client: Elasticsearch,
+    elasticsearch_client: Elasticsearch,
     index_name: str,
 ) -> None:
     try:
-        elastic_search_client.indices.create(
+        elasticsearch_client.indices.create(
             index=index_name,
         )
     except BadRequestError:
@@ -80,7 +103,7 @@ def create_index(
 
 
 def insert_documents(
-    elastic_search_client: Elasticsearch,
+    elasticsearch_client: Elasticsearch,
     index_name: str,
     docs: list[dict],
     id_field: str = "id",
@@ -96,16 +119,16 @@ def insert_documents(
     )
 
     success, errors = helpers.bulk(
-        client=elastic_search_client,
+        client=elasticsearch_client,
         actions=actions,
     )
 
 
 def delete_all_documents(
-    elastic_search_client: Elasticsearch,
+    elasticsearch_client: Elasticsearch,
     index_name: str,
 ) -> None:
-    elastic_search_client.delete_by_query(
+    elasticsearch_client.delete_by_query(
         index=index_name,
         body={
             "query": {
@@ -116,12 +139,12 @@ def delete_all_documents(
 
 
 def wait_for_elasticsearch(
-    elastic_search_client: Elasticsearch,
+    elasticsearch_client: Elasticsearch,
     retries: int = 30,
 ):
     for i in range(retries):
         try:
-            health = elastic_search_client.cluster.health(
+            health = elasticsearch_client.cluster.health(
                 wait_for_status="green",
             )
             status = health["status"]
@@ -131,5 +154,6 @@ def wait_for_elasticsearch(
                 pass
         except Exception:
             pass
+        print(f"Trying to reach ElasticSearch {i + 1}/{retries}")
         time.sleep(5)
     return False

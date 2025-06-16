@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  search-engine-elastic-api-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: search-engine-elastic-api-elasticsearch
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    command: >
+      bash -c "
+        /usr/local/bin/docker-entrypoint.sh &
+        sleep 30 &&
+        curl -X PUT http://localhost:9200/_cluster/settings -H 'Content-Type: application/json' -d '
+        {
+          \"persistent\": {
+            \"cluster.routing.allocation.disk.threshold_enabled\": false
+          }
+        }' &&
+        wait
+      "
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - search-engine-elastic-api-volume:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - search-engine-elastic-api-network
+
+  search-engine-elastic-api-kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: search-engine-elastic-api-kibana
+    depends_on:
+      - search-engine-elastic-api-elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://search-engine-elastic-api-elasticsearch:9200
+      - xpack.security.enabled=false
+      - SERVER_HOST=0.0.0.0
+    ports:
+      - "5601:5601"
+    networks:
+      - search-engine-elastic-api-network
+
+
+  search-engine-elastic-api-api:
+    build: 
+      context: ./apis/elastic-api
+      dockerfile: elastic-api.Dockerfile
+    container_name: search-engine-elastic-api-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - search-engine-elastic-api-elasticsearch
+    networks:
+      - search-engine-elastic-api-network
+    environment:
+      - ELASTICSEARCH_HOSTS=http://search-engine-elastic-api-elasticsearch:9200
+      - ELASTIC_INDEX_NAME=documents
+
+  search-engine-elastic-api-front:
+    build: 
+      context: ./front
+      dockerfile: front.Dockerfile
+    container_name: search-engine-elastic-api-front
+    networks:
+      - search-engine-elastic-api-network
+    ports:
+      - "2022:2022"
+    depends_on:
+      - search-engine-elastic-api-api
+    environment:
+      - API_URL=http://search-engine-elastic-api-api:8000
+
+networks:
+  search-engine-elastic-api-network:
+
+volumes:
+  search-engine-elastic-api-volume:
